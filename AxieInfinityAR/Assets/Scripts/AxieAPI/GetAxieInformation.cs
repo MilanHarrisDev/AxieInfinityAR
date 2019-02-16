@@ -55,7 +55,9 @@ public class AxieBone
     public float length;
 }
 
-public class AxieSkin{
+[System.Serializable]
+public class AxieSkin //TODO: need to figure out how to deserialize skins
+{
     public float rotation;
     public float x;
     public float y;
