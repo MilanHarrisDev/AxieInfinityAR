@@ -55,6 +55,14 @@ public class AxieBone
     public float length;
 }
 
+public class AxieSkin{
+    public float rotation;
+    public float x;
+    public float y;
+    public float width;
+    public float height;
+}
+
 public class GetAxieInformation : MonoBehaviour
 {
     public static GetAxieInformation Instance;
@@ -193,7 +201,7 @@ public class GetAxieInformation : MonoBehaviour
         }
         AxieManager.Manager.GetAxie(currentId).parts.Add(CreatePart(AxieManager.Manager.GetAxie(currentId).axieTexture, currentPartRect, currentPartName)); //create last sprite
 
-        StartCoroutine(GetAxieSpineBones());
+        StartCoroutine(GetAxieSpine("bones"));
     }
 
     private AxiePart CreatePart(Texture2D texture, Rect rect, string partName)
@@ -209,15 +217,14 @@ public class GetAxieInformation : MonoBehaviour
         return new AxiePart(partName, newSprite);
     }
 
-    private IEnumerator GetAxieSpineBones(string type = "axie")
+    private IEnumerator GetAxieSpine(string type)
     {
         UnityWebRequest wwwBones = UnityWebRequest.Get("https://us-central1-axieinfinityar.cloudfunctions.net/getAxieSpineModel?axieId=" + currentId + "&type=" + type);
         yield return wwwBones.SendWebRequest();
 
         AxieManager.Manager.GetAxie(currentId).bones = JsonConvert.DeserializeObject<List<AxieBone>>(wwwBones.downloadHandler.text);
-
         ConstructAxie();
-    }
+    }   
 
     private void ConstructAxie()
     {
@@ -234,7 +241,7 @@ public class GetAxieInformation : MonoBehaviour
         foreach (AxieBone bone in axie.bones)
         {
             string boneName = bone.name.Replace("@", "");
-            GameObject newBone = new GameObject(boneName);
+            GameObject newBone = new GameObject("bone-" + boneName);
             if (newBone.name == "root")
                 newBone.transform.parent = newAxieObj.transform;
             else

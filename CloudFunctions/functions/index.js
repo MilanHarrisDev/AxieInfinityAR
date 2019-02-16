@@ -64,7 +64,7 @@ exports.getAxieSpineModel = functions.https.onRequest((req, res) =>{
             
             switch(req.query.type)
             {
-                case 'axie':
+                case 'bones':
                     request(jsonBody.figure.axie.spineModel, function (error, response, body) { 
                         if (!error && response.statusCode == 200) 
                         {
@@ -73,25 +73,24 @@ exports.getAxieSpineModel = functions.https.onRequest((req, res) =>{
                         }
                     });
                     break;
-                case 'spirit':
+                case 'slots':
                     request(jsonBody.figure.spirit.spineModel, function (error, response, body) { 
                         if (!error && response.statusCode == 200) 
                         {
                             var spineJson = JSON.parse(body);
-                            res.status(200).send(spineJson.bones);
+                            res.status(200).send(spineJson.slots);
                         }
                     });                    
                     break;
-                default:
-                    request(jsonBody.figure.axie.spineModel, function (error, response, body) { 
+                case 'skins':
+                    request(jsonBody.figure.spirit.spineModel, function (error, response, body) { 
                         if (!error && response.statusCode == 200) 
                         {
                             var spineJson = JSON.parse(body);
-                            res.status(200).send(spineJson.bones);
+                            res.status(200).send(spineJson.skins);
                         }
-                    });
+                    });                    
                     break;
-            }
         }
     });
 });
