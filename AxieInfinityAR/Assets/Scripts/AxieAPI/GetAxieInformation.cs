@@ -19,6 +19,17 @@ public class Axie
     {
         this.id = id;
     }
+
+    public Sprite GetPartSprite(string partName)
+    {
+        foreach(AxiePart part in parts)
+        {
+            if (part.name == partName)
+                return part.sprite;
+        }
+
+        return null;
+    }
 }
 
 [System.Serializable]
@@ -41,6 +52,7 @@ public class AxieBone
     public float rotation;
     public float x;
     public float y;
+    public float length;
 }
 
 public class GetAxieInformation : MonoBehaviour
@@ -48,6 +60,8 @@ public class GetAxieInformation : MonoBehaviour
     public static GetAxieInformation Instance;
 
     private string currentId;
+
+    private float scaleFactor = 100f;
 
     private void Awake()
     {
@@ -59,9 +73,6 @@ public class GetAxieInformation : MonoBehaviour
             Instance = this;
         }
     }
-
-    [SerializeField]
-    private Renderer r;
 
     public void StartAxieCreate(string id)
     {
@@ -95,8 +106,6 @@ public class GetAxieInformation : MonoBehaviour
         AxieManager.Manager.GetAxie(currentId).axieTexture = DownloadHandlerTexture.GetContent(wwwTexture);
 
         Debug.Log("Axie image downloaded");
-
-        r.material.SetTexture("_MainTex", AxieManager.Manager.GetAxie(currentId).axieTexture);
 
         byte[] bytes = AxieManager.Manager.GetAxie(currentId).axieTexture.EncodeToPNG();
         //write to project
@@ -194,7 +203,7 @@ public class GetAxieInformation : MonoBehaviour
         finalRect.size = rect.size;
         finalRect.position = new Vector2(rect.position.x, texture.height - rect.position.y - rect.size.y);
 
-        Sprite newSprite = Sprite.Create(texture, finalRect, new Vector2(0f, 0f), 500);
+        Sprite newSprite = Sprite.Create(texture, finalRect, new Vector2(0.5f, 0.5f), scaleFactor);
         Debug.LogFormat("{0} sprite created", partName);
 
         return new AxiePart(partName, newSprite);
@@ -220,9 +229,31 @@ public class GetAxieInformation : MonoBehaviour
             return;
         }
 
-        foreach(AxieBone bone in axie.bones)
+        GameObject newAxieObj = new GameObject("axie" + currentId);
+
+        foreach (AxieBone bone in axie.bones)
         {
-            new GameObject(bone.name);
+            string boneName = bone.name.Replace("@", "");
+            GameObject newBone = new GameObject(boneName);
+            if (newBone.name == "root")
+                newBone.transform.parent = newAxieObj.transform;
+            else
+            {
+                newBone.transform.parent = newAxieObj.transform.FindDeepChild(bone.parent.Replace("@", ""));
+                SpriteRenderer sr = newBone.AddComponent<SpriteRenderer>();
+                sr.sprite = axie.GetPartSprite(boneName);
+
+                newBone.transform.position = new Vector2(bone.x/scaleFactor, bone.y/ scaleFactor);
+
+
+                if (bone.rotation != 0) {
+                    float parentRot = 0;
+                    if (transform.parent)
+                        parentRot = transform.parent.rotation.eulerAngles.z;
+
+                    newBone.transform.Rotate(Vector3.forward, (bone.rotation - 180f) - parentRot);
+                }
+            }
         }
     }
 }
