@@ -20,8 +20,6 @@ using System.Net;
 
 using ExitGames.Client.Photon;
 
-using Newtonsoft.Json;
-
 namespace Photon.Pun
 {
     public class AccountService
@@ -200,7 +198,7 @@ namespace Photon.Pun
                 return;
             }
 
-            Dictionary<string, string> values = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
+            Dictionary<string, string> values = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
             if (values == null)
             {
                 this.Message = "Service temporarily unavailable. Please register through account website.";
