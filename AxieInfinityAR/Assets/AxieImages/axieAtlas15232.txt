@@ -1,0 +1,125 @@
+back
+  rotate: false
+  xy: 580, 315
+  size: 231, 189
+  orig: 231, 189
+  offset: 0, 0
+  index: -1
+body
+  rotate: false
+  xy: 2, 74
+  size: 576, 430
+  orig: 576, 430
+  offset: 0, 0
+  index: -1
+ear-left
+  rotate: true
+  xy: 1709, 404
+  size: 100, 108
+  orig: 100, 108
+  offset: 0, 0
+  index: -1
+ear-right
+  rotate: false
+  xy: 1819, 410
+  size: 88, 94
+  orig: 88, 94
+  offset: 0, 0
+  index: -1
+eyes
+  rotate: false
+  xy: 813, 340
+  size: 290, 84
+  orig: 290, 84
+  offset: 0, 0
+  index: -1
+eyes-angry
+  rotate: false
+  xy: 1125, 420
+  size: 290, 84
+  orig: 290, 84
+  offset: 0, 0
+  index: -1
+eyes-shut
+  rotate: false
+  xy: 1417, 420
+  size: 290, 84
+  orig: 290, 84
+  offset: 0, 0
+  index: -1
+horn
+  rotate: false
+  xy: 580, 123
+  size: 122, 190
+  orig: 122, 190
+  offset: 0, 0
+  index: -1
+leg-back-left
+  rotate: false
+  xy: 212, 2
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+leg-back-right
+  rotate: false
+  xy: 1909, 416
+  size: 74, 88
+  orig: 74, 88
+  offset: 0, 0
+  index: -1
+leg-front-right
+  rotate: false
+  xy: 1909, 416
+  size: 74, 88
+  orig: 74, 88
+  offset: 0, 0
+  index: -1
+leg-front-left
+  rotate: true
+  xy: 138, 2
+  size: 70, 72
+  orig: 70, 72
+  offset: 0, 0
+  index: -1
+mouth
+  rotate: false
+  xy: 580, 85
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+mouth-bite
+  rotate: false
+  xy: 284, 8
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+mouth-open
+  rotate: false
+  xy: 1985, 424
+  size: 56, 80
+  orig: 56, 80
+  offset: 0, 0
+  index: -1
+pattern
+  rotate: true
+  xy: 2, 21
+  size: 51, 134
+  orig: 51, 134
+  offset: 0, 0
+  index: -1
+shadow
+  rotate: false
+  xy: 813, 426
+  size: 310, 78
+  orig: 310, 78
+  offset: 0, 0
+  index: -1
+tail
+  rotate: true
+  xy: 704, 163
+  size: 150, 140
+  orig: 150, 140
+  offset: 0, 0

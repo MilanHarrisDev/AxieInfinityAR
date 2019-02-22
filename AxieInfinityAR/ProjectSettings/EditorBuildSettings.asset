@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Menu.unity
-    guid: 1340b9fe4c5a64af2b3ea2b8abb05f6e
+    path: Assets/Scenes/Plane Detection/TogglePlaneDetection.unity
+    guid: eb4bbb3a5e81acc41a903b1c5f1c827b
   m_configObjects: {}

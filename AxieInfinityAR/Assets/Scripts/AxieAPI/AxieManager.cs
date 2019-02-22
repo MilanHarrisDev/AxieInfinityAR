@@ -5,6 +5,7 @@ using UnityEngine;
 public class AxieManager : MonoBehaviour
 {
     public static AxieManager Manager;
+    public string axieId;
 
     private void Awake()
     {
@@ -19,7 +20,7 @@ public class AxieManager : MonoBehaviour
 
     private void Start()
     {
-        CreateAxie("12515");
+        CreateAxie(axieId);
     }
 
     [SerializeField]

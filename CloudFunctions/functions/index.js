@@ -61,36 +61,35 @@ exports.getAxieSpineModel = functions.https.onRequest((req, res) =>{
         if (!error && response.statusCode == 200) 
         {
             var jsonBody = JSON.parse(body);
-            
-            switch(req.query.type)
-            {
-                case 'bones':
-                    request(jsonBody.figure.axie.spineModel, function (error, response, body) { 
-                        if (!error && response.statusCode == 200) 
-                        {
-                            var spineJson = JSON.parse(body);
+            request(jsonBody.figure.axie.spineModel, function (error, response, body) { 
+                if (!error && response.statusCode == 200) 
+                {
+                    var spineJson = JSON.parse(body);
+                    switch(req.query.type)
+                    {
+                        case 'bones':
                             res.status(200).send(spineJson.bones);
-                        }
-                    });
-                    break;
-                case 'slots':
-                    request(jsonBody.figure.spirit.spineModel, function (error, response, body) { 
-                        if (!error && response.statusCode == 200) 
-                        {
-                            var spineJson = JSON.parse(body);
+                            break;
+                        case 'slots':
                             res.status(200).send(spineJson.slots);
-                        }
-                    });                    
-                    break;
-                case 'skins':
-                    request(jsonBody.figure.spirit.spineModel, function (error, response, body) { 
-                        if (!error && response.statusCode == 200) 
-                        {
-                            var spineJson = JSON.parse(body);
-                            res.status(200).send(spineJson.skins);
-                        }
-                    });                    
-                    break;
+                            break;
+                        case 'skins':
+                            var skinTypes = ['shadow', 'leg-front-right', 'leg-back-right',
+                             'ear-right', 'tail', 'back', 'body', 'pattern', 'leg-front-left', 
+                             'leg-back-left', 'eyes', 'mouth', 'horn', 'ear-left'];
+
+                            var skinsArray = [];
+
+                            skinTypes.forEach(function(element){
+                                var temp = spineJson.skins.default[element][element];
+                                temp["name"] = element;
+                                skinsArray.push(temp);
+                            });
+                            res.status(200).send(skinsArray);
+                            break;
+                    }
+                }
+            });
         }
     });
 });

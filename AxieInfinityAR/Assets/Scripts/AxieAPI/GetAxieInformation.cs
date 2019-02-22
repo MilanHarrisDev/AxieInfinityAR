@@ -14,6 +14,7 @@ public class Axie
     public string[] atlas;
     public List<AxiePart> parts = new List<AxiePart>();
     public List<AxieBone> bones;
+    public List<AxieSkin> skins;
 
     public Axie(string id)
     {
@@ -35,12 +36,14 @@ public class Axie
 [System.Serializable]
 public class AxiePart{
     public string name = "";
+    public bool rotate;
     public Sprite sprite;
 
-    public AxiePart(string name, Sprite sprite)
+    public AxiePart(string name, Sprite sprite, bool rotate)
     {
         this.name = name;
         this.sprite = sprite;
+        this.rotate = rotate;
     }
 }
 
@@ -56,8 +59,9 @@ public class AxieBone
 }
 
 [System.Serializable]
-public class AxieSkin //TODO: need to figure out how to deserialize skins
+public class AxieSkin 
 {
+    public string name;
     public float rotation;
     public float x;
     public float y;
@@ -171,11 +175,14 @@ public class GetAxieInformation : MonoBehaviour
 
         string currentPartName = "";
         Rect currentPartRect = new Rect(0,0,0,0);
+        bool rotate = false;
+
         //Loop through each part and create sprite
-        for(int i = 0; i < atlasTemp.Count; i++)
+        for (int i = 0; i < atlasTemp.Count; i++)
         {
             if (string.IsNullOrEmpty(atlasTemp[i]))
                 continue;
+
 
             if(atlasTemp[i][0] == ' ')//if first character in line is a space
             {
@@ -184,29 +191,53 @@ public class GetAxieInformation : MonoBehaviour
                 {
                     string[] xyValues = line.Split(':')[1].Split(','); //Gets string array where value at 0 is x pos and value at 1 is y pos
                     currentPartRect.position = new Vector2(int.Parse(xyValues[0]), int.Parse(xyValues[1])); //set rect position
-                    Debug.LogFormat("position for {0} = ({1},{2})", currentPartName, xyValues[0], xyValues[1]);
+                    //Debug.LogFormat("position for {0} = ({1},{2})", currentPartName, xyValues[0], xyValues[1]);
                 }
                 else if (line.Contains("size"))
                 {
                     string[] xyValues = line.Split(':')[1].Split(','); //Gets string array where value at 0 is x size and value at 1 is y size
                     currentPartRect.size = new Vector2(int.Parse(xyValues[0]), int.Parse(xyValues[1])); //set rect size
-                    Debug.LogFormat("size for {0} = ({1},{2})", currentPartName, xyValues[0], xyValues[1]);
+                    //Debug.LogFormat("size for {0} = ({1},{2})", currentPartName, xyValues[0], xyValues[1]);
+                }
+                else if (line.Contains("rotate"))
+                {
+                    rotate = line.Contains("true") || rotate;
+                    Debug.LogFormat("<color=yellow>rotate = {0}</color>", rotate);
                 }
             }
             else
             {
                 if (currentPartRect.size.magnitude != 0)
-                    AxieManager.Manager.GetAxie(currentId).parts.Add(CreatePart(AxieManager.Manager.GetAxie(currentId).axieTexture, currentPartRect, currentPartName));
+                {
+                    if(rotate)
+                    {
+                        Debug.Log("<color=green>Before Rotation</color>:");
+                        Debug.LogFormat("size for {0} = ({1},{2})", currentPartName, currentPartRect.size.x, currentPartRect.size.y);
+
+                        Vector2 newSize = new Vector2(currentPartRect.size.y, currentPartRect.size.x);
+                        currentPartRect.size = newSize;
+                        Debug.Log("<color=red>After Rotation</color>:");
+
+                    }
+
+                    AxieManager.Manager.GetAxie(currentId).parts.Add(CreatePart(AxieManager.Manager.GetAxie(currentId).axieTexture, currentPartRect, currentPartName, rotate));
+
+                    Debug.LogFormat("size for {0} = ({1},{2})", currentPartName, currentPartRect.size.x, currentPartRect.size.y);
+                    Debug.LogFormat("pos for {0} = ({1},{2})", currentPartName, currentPartRect.position.x, currentPartRect.position.y);
+                }
+
                 currentPartName = atlasTemp[i];
                 currentPartRect = new Rect();
+                rotate = false;
             }
         }
-        AxieManager.Manager.GetAxie(currentId).parts.Add(CreatePart(AxieManager.Manager.GetAxie(currentId).axieTexture, currentPartRect, currentPartName)); //create last sprite
 
-        StartCoroutine(GetAxieSpine("bones"));
+        AxieManager.Manager.GetAxie(currentId).parts.Add(CreatePart(AxieManager.Manager.GetAxie(currentId).axieTexture, currentPartRect, currentPartName, rotate)); //create last sprite
+
+        StartCoroutine(GetAxieBoneSpine());
     }
 
-    private AxiePart CreatePart(Texture2D texture, Rect rect, string partName)
+    private AxiePart CreatePart(Texture2D texture, Rect rect, string partName, bool rotate = false)
     {
         //Do operations to fix position
         Rect finalRect = new Rect();
@@ -216,17 +247,26 @@ public class GetAxieInformation : MonoBehaviour
         Sprite newSprite = Sprite.Create(texture, finalRect, new Vector2(0.5f, 0.5f), scaleFactor);
         Debug.LogFormat("{0} sprite created", partName);
 
-        return new AxiePart(partName, newSprite);
+        return new AxiePart(partName, newSprite, rotate);
     }
 
-    private IEnumerator GetAxieSpine(string type)
+    private IEnumerator GetAxieBoneSpine()
     {
-        UnityWebRequest wwwBones = UnityWebRequest.Get("https://us-central1-axieinfinityar.cloudfunctions.net/getAxieSpineModel?axieId=" + currentId + "&type=" + type);
+        UnityWebRequest wwwBones = UnityWebRequest.Get("https://us-central1-axieinfinityar.cloudfunctions.net/getAxieSpineModel?axieId=" + currentId + "&type=bones");
         yield return wwwBones.SendWebRequest();
 
         AxieManager.Manager.GetAxie(currentId).bones = JsonConvert.DeserializeObject<List<AxieBone>>(wwwBones.downloadHandler.text);
+        StartCoroutine(GetAxieSkinSpine());
+    }
+
+    private IEnumerator GetAxieSkinSpine()
+    {
+        UnityWebRequest wwwSkins = UnityWebRequest.Get("https://us-central1-axieinfinityar.cloudfunctions.net/getAxieSpineModel?axieId=" + currentId + "&type=skins");
+        yield return wwwSkins.SendWebRequest();
+
+        AxieManager.Manager.GetAxie(currentId).skins = JsonConvert.DeserializeObject<List<AxieSkin>>(wwwSkins.downloadHandler.text);
         ConstructAxie();
-    }   
+    }
 
     private void ConstructAxie()
     {
@@ -244,25 +284,81 @@ public class GetAxieInformation : MonoBehaviour
         {
             string boneName = bone.name.Replace("@", "");
             GameObject newBone = new GameObject("bone-" + boneName);
-            if (newBone.name == "root")
+            if (newBone.name == "bone-root")
                 newBone.transform.parent = newAxieObj.transform;
             else
             {
-                newBone.transform.parent = newAxieObj.transform.FindDeepChild(bone.parent.Replace("@", ""));
-                SpriteRenderer sr = newBone.AddComponent<SpriteRenderer>();
-                sr.sprite = axie.GetPartSprite(boneName);
-
-                newBone.transform.position = new Vector2(bone.x/scaleFactor, bone.y/ scaleFactor);
-
+                newBone.transform.parent = newAxieObj.transform.FindDeepChild(bone.parent.Replace("@", "bone-"));
+                newBone.transform.localPosition = new Vector2(bone.x/scaleFactor, bone.y/ scaleFactor);
 
                 if (bone.rotation != 0) {
                     float parentRot = 0;
                     if (transform.parent)
                         parentRot = transform.parent.rotation.eulerAngles.z;
 
-                    newBone.transform.Rotate(Vector3.forward, (bone.rotation - 180f) - parentRot);
+                    newBone.transform.Rotate(Vector3.forward, bone.rotation - parentRot /*(bone.rotation - 180f) - parentRot*/);
                 }
             }
+        }
+
+        foreach(AxieSkin skin in axie.skins)
+        {
+            string skinName = skin.name;
+            GameObject newSkin = new GameObject("skin-" + skinName);
+
+            newSkin.transform.parent = newAxieObj.transform.FindDeepChild("bone-" + skin.name);
+
+
+            bool partRotate = false;
+
+            foreach (AxiePart part in axie.parts)
+            {
+                if (part.name.Equals(skinName))
+                    partRotate = part.rotate;
+            }
+
+
+            Vector2 newPos = new Vector2(skin.x / scaleFactor, skin.y / scaleFactor);
+
+            Transform newTransform = newSkin.transform.parent.Find("bone-" + skin.name);
+            if (newTransform)
+            {
+                newPos = partRotate ? new Vector2(skin.y / scaleFactor, skin.x / scaleFactor) :
+                    newPos;
+                newSkin.transform.parent = newTransform;
+            }
+
+            if (newTransform)
+                newPos = new Vector2(-newPos.x, -newPos.y);
+
+            if (skinName.Contains("tail"))
+                newPos = new Vector2(-newPos.x, -newPos.y);
+
+            newSkin.transform.localPosition = newPos;
+
+            if (partRotate)
+                newSkin.transform.Rotate(Vector3.forward, -90);
+
+            //partRotate = false;
+
+           
+            /*if (skin.rotation != 0f)
+            {
+                float parentRot = 0;
+                if (transform.parent)
+                    parentRot = transform.parent.rotation.eulerAngles.z;
+                //newSkin.transform.Rotate(Vector3.forward, skin.rotation (skin.rotation - 180f) - parentRot);
+            }
+            */
+
+            /*
+             * if (skin.name.Contains("ear") || skin.name.Contains("mouth"))
+                newSkin.transform.Rotate(Vector3.forward, -90);
+            */
+
+            SpriteRenderer sr = newSkin.AddComponent<SpriteRenderer>();
+            sr.sprite = axie.GetPartSprite(skinName);
+
         }
     }
 }
