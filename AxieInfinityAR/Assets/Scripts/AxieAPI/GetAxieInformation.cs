@@ -77,6 +77,8 @@ public class GetAxieInformation : MonoBehaviour
 
     private float scaleFactor = 100f;
 
+    private GameObject axieObj;
+
     private void Awake()
     {
         if (Instance == null)
@@ -102,9 +104,13 @@ public class GetAxieInformation : MonoBehaviour
         yield return wwwImage.SendWebRequest();
 
         if (wwwImage.isNetworkError || wwwImage.isHttpError)
+        {
             Debug.Log(wwwImage.error);
+            AxieObject.Instance.CreationErrorReturn(true);
+        }
         else
         {
+            AxieObject.Instance.CreationErrorReturn(false);
             Debug.LogFormat("downloading axie image from {0}", wwwImage.downloadHandler.text);
             StartCoroutine(DownloadAxieImage(wwwImage.downloadHandler.text));
         }
@@ -123,8 +129,11 @@ public class GetAxieInformation : MonoBehaviour
 
         byte[] bytes = AxieManager.Manager.GetAxie(currentId).axieTexture.EncodeToPNG();
         //write to project
-        File.WriteAllBytes(Application.dataPath + "/axieImages/axieSpriteSheet" + currentId + ".png", bytes);
-        Debug.LogFormat("{0}/axieImages/axieSpriteSheet{1}.png has been written", Application.dataPath, currentId);
+        string imageDir = Application.persistentDataPath + "/axieImages";
+        if (!Directory.Exists(imageDir))
+            Directory.CreateDirectory(imageDir);
+        File.WriteAllBytes(imageDir + "/axieSpriteSheet" + currentId + ".png", bytes);
+        Debug.LogFormat("{0}/axieImages/axieSpriteSheet{1}.png has been written", Application.persistentDataPath, currentId);
 
         StartCoroutine(GetAxieImageAtlasUrl(currentId));
     }
@@ -148,7 +157,7 @@ public class GetAxieInformation : MonoBehaviour
 
         yield return wwwAtlas.SendWebRequest();
 
-        string path = Application.dataPath + "/axieImages/axieAtlas" + currentId + ".txt";
+        string path = Application.persistentDataPath + "/axieImages/axieAtlas" + currentId + ".txt";
 
         File.WriteAllBytes(path, wwwAtlas.downloadHandler.data);
         AxieManager.Manager.GetAxie(currentId).atlas = File.ReadAllLines(path);
@@ -279,6 +288,8 @@ public class GetAxieInformation : MonoBehaviour
         }
 
         GameObject newAxieObj = new GameObject("axie" + currentId);
+        newAxieObj.transform.parent = AxieObject.Instance.transform;
+        axieObj = newAxieObj;
 
         foreach (AxieBone bone in axie.bones)
         {
@@ -318,21 +329,21 @@ public class GetAxieInformation : MonoBehaviour
             }
 
 
-            Vector2 newPos = new Vector2(skin.x / scaleFactor, skin.y / scaleFactor);
+            Vector3 newPos = new Vector3(skin.x / scaleFactor, skin.y / scaleFactor, 0);
 
             Transform newTransform = newSkin.transform.parent.Find("bone-" + skin.name);
             if (newTransform)
             {
-                newPos = partRotate ? new Vector2(skin.y / scaleFactor, skin.x / scaleFactor) :
+                newPos = partRotate ? new Vector3(skin.y / scaleFactor, skin.x / scaleFactor, 0) :
                     newPos;
                 newSkin.transform.parent = newTransform;
             }
 
             if (newTransform)
-                newPos = new Vector2(-newPos.x, -newPos.y);
+                newPos = new Vector3(-newPos.x, -newPos.y, 0);
 
             if (skinName.Contains("tail"))
-                newPos = new Vector2(-newPos.x, -newPos.y);
+                newPos = new Vector3(-newPos.x, -newPos.y, 0);
 
             newSkin.transform.localPosition = newPos;
 
@@ -359,6 +370,18 @@ public class GetAxieInformation : MonoBehaviour
             SpriteRenderer sr = newSkin.AddComponent<SpriteRenderer>();
             sr.sprite = axie.GetPartSprite(skinName);
 
+
+            if (skinName == "body")
+                sr.sortingOrder = 1;
+            else if (skinName == "ear-right" || skinName == "tail" || skinName == ("leg-back-right") || skinName == ("leg-front-right") || skinName == "back")
+                sr.sortingOrder = 0;
+            else
+                sr.sortingOrder = 2;
+
         }
+
+        axieObj.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        axieObj.transform.localPosition = new Vector3(.12f, 0, 0);
+        axieObj.transform.localRotation = Quaternion.identity;
     }
 }

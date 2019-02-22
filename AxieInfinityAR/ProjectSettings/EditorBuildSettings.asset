@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Plane Detection/TogglePlaneDetection.unity
-    guid: eb4bbb3a5e81acc41a903b1c5f1c827b
+    path: Assets/Scenes/AxieTest.unity
+    guid: 957310898189d4b4eac41df91a1ad4e7
   m_configObjects: {}

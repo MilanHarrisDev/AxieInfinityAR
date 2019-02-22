@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.XR.ARFoundation;
 
 public class AxieManager : MonoBehaviour
 {
@@ -20,7 +22,12 @@ public class AxieManager : MonoBehaviour
 
     private void Start()
     {
-        CreateAxie(axieId);
+    }
+
+
+    public void ToggleTracking()
+    {
+        FindObjectOfType<ARSession>().enabled = FindObjectOfType<ARSession>().enabled;
     }
 
     [SerializeField]
